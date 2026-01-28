@@ -2,9 +2,9 @@
 LLM configuration and authentication for FinAgent.
 """
 
+from typing import Any
 import uuid
 import requests
-from agno.models.openai import OpenAILike
 from settings import get_settings
 
 _cached_token: str | None = None
@@ -54,7 +54,10 @@ def _get_auth_token() -> str:
         raise
 
 
-def get_llm(model: str = "amazon.nova-pro-v1-0") -> OpenAILike:
+def get_llm(
+    model: str = "amazon.nova-pro-v1-0",
+    provider: str = "intuit",
+) -> Any:
     """
     Get configured LLM instance.
 
@@ -68,11 +71,18 @@ def get_llm(model: str = "amazon.nova-pro-v1-0") -> OpenAILike:
     """
     settings = get_settings()
 
-    return OpenAILike(
-        base_url=f"https://llmexecution.api.intuit.com/v3/lt/{model}",
-        extra_headers={
-            "intuit_experience_id": settings.experience_id,
-            "intuit_originating_assetalias": "Intuit.coe.pecomplianceremediation",
-            "Authorization": _get_auth_token(),
-        },
-    )
+    if provider == "intuit":
+        from agno.models.openai import OpenAILike
+
+        return OpenAILike(
+            base_url=f"https://llmexecution.api.intuit.com/v3/lt/{model}",
+            extra_headers={
+                "intuit_experience_id": settings.experience_id,
+                "intuit_originating_assetalias": "Intuit.coe.pecomplianceremediation",
+                "Authorization": _get_auth_token(),
+            },
+        )
+    elif provider == "openai":
+        from agno.models.openai import OpenAIResponses
+
+        return OpenAIResponses(id=model)
