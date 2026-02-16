@@ -64,6 +64,7 @@ def create_agent_os(
     os_id: str = "finagent-os",
     description: str = "Financial Advisor Agent OS for Indians",
     agents: List[Agent] | None = None,
+    teams: List[Team] | None = None,
 ) -> AgentOS:
     """
     Create an AgentOS instance with all loaded agents.
@@ -72,12 +73,16 @@ def create_agent_os(
         os_id: Unique identifier for the AgentOS
         description: Description of the AgentOS
         agents: Optional list of agents. If None, loads all agents from agents folder.
+        teams: Optional list of teams. If None, loads all teams from agents folder.
 
     Returns:
         Configured AgentOS instance
     """
-    if agents is None:
+    if agents is None and teams is None:
         agents, teams = load_all_agents_and_teams()
+
+    agents = agents or []
+    teams = teams or []
 
     if not agents and not teams:
         print(
